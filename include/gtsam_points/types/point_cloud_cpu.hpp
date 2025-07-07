@@ -94,9 +94,6 @@ public:
 
   static PointCloudCPU::Ptr load(const std::string& path);
 
-  /// @brief Memory usage in bytes
-  size_t memory_usage() const;
-
 public:
   std::vector<double> times_storage;
   std::vector<Eigen::Vector4d> points_storage;

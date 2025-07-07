@@ -11,7 +11,6 @@
 #include <gtsam_points/cuda/stream_temp_buffer_roundrobin.hpp>
 #include <gtsam_points/cuda/cuda_malloc_async.hpp>
 
-#include <gtsam_points/types/point_cloud_gpu.hpp>
 #include <gtsam_points/types/gaussian_voxelmap_gpu.hpp>
 
 namespace gtsam_points {
@@ -21,8 +20,7 @@ IntegratedVGICPDerivatives::IntegratedVGICPDerivatives(
   const PointCloud::ConstPtr& source,
   CUstream_st* ext_stream,
   std::shared_ptr<TempBufferManager> temp_buffer)
-: enable_offloading(false),
-  enable_surface_validation(false),
+: enable_surface_validation(false),
   inlier_update_thresh_trans(1e-6),
   inlier_update_thresh_angle(1e-6),
   target(target),
@@ -58,23 +56,6 @@ IntegratedVGICPDerivatives::~IntegratedVGICPDerivatives() {
 
 void IntegratedVGICPDerivatives::sync_stream() {
   check_error << cudaStreamSynchronize(stream);
-}
-
-void IntegratedVGICPDerivatives::touch_points() {
-  if (!enable_offloading) {
-    return;
-  }
-
-  auto target_ = const_cast<GaussianVoxelMapGPU*>(target.get());
-  target_->touch(stream);
-
-  auto source_gpu_const = dynamic_cast<const PointCloudGPU*>(source.get());
-  if (!source_gpu_const) {
-    return;
-  }
-
-  auto source_gpu = const_cast<PointCloudGPU*>(source_gpu_const);
-  source_gpu->touch(stream);
 }
 
 LinearizedSystem6 IntegratedVGICPDerivatives::linearize(const Eigen::Isometry3f& x) {
